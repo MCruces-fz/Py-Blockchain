@@ -1,5 +1,6 @@
 from hashlib import sha256
 import json
+import time
 
 
 class Block:
@@ -19,3 +20,25 @@ class Block:
         """ 
         block_string = json.dumps(self.__dict__, sort_keys=True)
         return sha256(block_string.encode()).hexdigest()
+
+
+class Blockchain:
+ 
+    def __init__(self):
+        self.unconfirmed_transactions = [] # información para insertar en el blockchain
+        self.chain = []
+        self.create_genesis_block()
+ 
+    def create_genesis_block(self):
+        """
+        Function to generate the genesis block and add it to the 
+        chain. That block has index  0, previous hash 0 and a 
+        valid hash.
+        """
+        genesis_block = Block(0, [], time.time(), "0")
+        genesis_block.hash = genesis_block.compute_hash()
+        self.chain.append(genesis_block)
+ 
+    @property
+    def last_block(self):
+        return self.chain[-1]
