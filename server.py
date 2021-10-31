@@ -18,6 +18,7 @@ class Block:
         :param block: json object
         :return: sha256 string
         """ 
+
         block_string = json.dumps(self.__dict__, sort_keys=True)
         return sha256(block_string.encode()).hexdigest()
 
@@ -36,6 +37,7 @@ class Blockchain:
         chain. That block has index  0, previous hash 0 and a 
         valid hash.
         """
+
         genesis_block = Block(0, [], time.time(), "0")
         genesis_block.hash = genesis_block.compute_hash()
         self.chain.append(genesis_block)
@@ -49,6 +51,7 @@ class Blockchain:
         Tries distinct nonce values until get a hash that satisfies our
         difficulty criteria.
         """
+
         block.nonce = 0
 
         computed_hash = block.compute_hash()
@@ -57,3 +60,31 @@ class Blockchain:
             computed_hash = block.compute_hash()
 
         return computed_hash
+
+    def add_block(self, block, proof):
+        """
+        Add block to chain after verification.
+        """
+
+        previous_hash = self.last_block.hash
+
+        if previous_hash != block.previous_hash:
+            return False
+
+        if not self.is_valid_proof(block, proof):
+            return False
+
+        block.hash = proof
+        self.chain.append(block)
+
+        return True
+
+    def is_valid_proof(self, block, block_hash):
+        """
+        Check if block_hash is a valid hash and satisfies our
+        difficulty criteria.
+        """
+
+        return (block.hash.startswith('0' * Blockchain.difficulty) and 
+                block.hash == block.compute_hash())
+
