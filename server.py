@@ -27,7 +27,7 @@ class Blockchain:
     difficulty = 2
  
     def __init__(self):
-        self.unconfirmed_transactions = [] # información para insertar en el blockchain
+        self.unconfirmed_transactions = []
         self.chain = []
         self.create_genesis_block()
  
@@ -87,4 +87,31 @@ class Blockchain:
 
         return (block.hash.startswith('0' * Blockchain.difficulty) and 
                 block.hash == block.compute_hash())
+
+    def add_new_transaction(self, transaction):
+        self.unconfirmed_transactions.append(transaction)
+
+    def mine(self):
+        """
+        Interface to add transactions to blocks, put them in the 
+        blockchain and calculate the proof of work.
+        """
+
+        if not self.unconfirmed_transactions:
+            return False
+
+        last_block = self.last_block
+
+        new_block = Block(
+                index=last_block.index + 1,
+                transactions=self.unconfirmed_transactions,
+                timestamp=time.time(),
+                previous_hash=last_block.hash
+                )
+
+        proof = self.proof_of_work(new_block)
+        self.add_block(new_block, proof)
+        self.unconfirmed_transactions = []
+
+        return new_block.index
 
