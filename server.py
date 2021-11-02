@@ -2,6 +2,9 @@ from hashlib import sha256
 import json
 import time
 
+from flask import Flask, request
+import requests
+
 
 class Block:
     def __init__(self, index, transactions, timestamp, previous_hash, nonce=0):
@@ -27,6 +30,9 @@ class Blockchain:
     difficulty = 2
  
     def __init__(self):
+        """
+        Initialize Blockchain with a genesis block
+        """
         self.unconfirmed_transactions = []
         self.chain = []
         self.create_genesis_block()
@@ -115,3 +121,23 @@ class Blockchain:
 
         return new_block.index
 
+
+app = Flask(__name__)
+
+# the node's copy of blockchain
+blockchain = Blockchain()
+
+@app.route('/new_transaction', methods=['POST'])
+def new_transaction():
+    tx_data = request.get_json()
+    required_fields = ["author", "content"]
+    
+    for field in required_fields:
+        if not tx_data.get(field):
+            return "Invalid transaction data", 404
+
+    tx_data["timestamp"] = time.time()
+
+    blockchain.add_new_transaction(tx_data)
+
+    return "Success", 201
