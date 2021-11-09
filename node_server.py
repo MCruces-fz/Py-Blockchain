@@ -162,4 +162,17 @@ def mine_unconfirmed_transactions():
 def get_pending_tx():
     return json.dumps(blockchain.unconfirmed_transactions)
 
+peers = set()
+
+# endpoint to add new peers to the network.
+@app.route('/add_nodes', methods=['POST'])
+def register_new_peers():
+    nodes = request.get_json()
+    if not nodes:
+        return "Invalid data", 400
+    for node in nodes:
+        peers.add(node)
+
+    return "Success", 201
+
 app.run(debug=True, port=8000)
