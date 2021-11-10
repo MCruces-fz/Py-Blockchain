@@ -175,4 +175,28 @@ def register_new_peers():
 
     return "Success", 201
 
+def consensus():
+    """
+    Our simple algorithm of consensus. If a longer valid string 
+    is found, our string will be replaced.
+    """
+    global blockchain
+
+    longest_chain = None
+    current_len = len(blockchain)
+
+    for node in peers:
+        response = requests.get(f'http://{node}/chain')
+        length = response.json()['length']
+        chain = response.json()['chain']
+        if length > current_len and blockchain.check_chain_validity(chain):
+            current_len = length
+            longest_chain = chain
+
+    if longest_chain:
+        blockchain = longest_chain
+        return True
+
+    return False
+
 app.run(debug=True, port=8000)
